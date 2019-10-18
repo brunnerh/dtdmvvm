@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,12 +7,38 @@ using System.Windows.Input;
 namespace DTDMVVM.Utility
 {
 	/// <summary>
-	/// A delegate-based <see cref="System.Windows.Input.ICommand"/> implementation.
+	/// A delegate-based <see cref="ICommand"/> implementation.
 	/// </summary>
 	public class Command : ICommand
 	{
 		private readonly Func<object, bool> _canExecute = param => true;
 		private readonly Action<object> _execute = param => { };
+
+		/// <summary>
+		/// Whether all <see cref="CanExecuteChanged"/> events have to be fired manually using
+		/// <see cref="RaiseCanExecuteChanged"/>. Default: false.
+		/// <para>
+		/// If <b>false</b>, <see cref="CommandManager.RequerySuggested"/> is used as well.
+		/// </para>
+		/// </summary>
+		public bool ManualCanExecuteHandling { get; set; }
+
+		private event EventHandler ManualCanExecuteChanged;
+
+		public event EventHandler CanExecuteChanged
+		{
+			add
+			{
+				ManualCanExecuteChanged += value;
+				if (ManualCanExecuteHandling == false)
+					CommandManager.RequerySuggested += value;
+			}
+			remove
+			{
+				ManualCanExecuteChanged -= value;
+				CommandManager.RequerySuggested -= value;
+			}
+		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DTDMVVM.Command"/> class which does nothing and can always be executed.
@@ -69,19 +95,9 @@ namespace DTDMVVM.Utility
 				Execute(parameter);
 		}
 
-
-		public event EventHandler CanExecuteChanged;
-
 		/// <summary>
 		/// Raises the <see cref="CanExecuteChanged"/> event, this method should be called to make controls reevaluate the <see cref="CanExecute"/> method.
 		/// </summary>
-		public void RaiseCanExecuteChanged()
-		{
-			var handler = CanExecuteChanged;
-			if (handler != null)
-			{
-				handler(this, null);
-			}
-		}
+		public void RaiseCanExecuteChanged() => ManualCanExecuteChanged?.Invoke(this, null);
 	}
 }

@@ -2,5 +2,6 @@
 [Oo]bj/
 [Ll]og/
 
+.vs
 *.suo
 *.user
