@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,24 +16,37 @@ namespace DTDMVVM
 	/// </summary>
 	public static class DataTemplateCreator
 	{
-		// 0: assembly-name
-		// 1: vm-type-namespace
-		// 2: vm-type-name
-		// 3: v-type-namespace
-		// 4: v-type-name
-		private const string DataTemplateFormatString = @"<DataTemplate xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation""
-				    xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml""
-					xmlns:vm=""clr-namespace:{1};assembly={0}""
-					DataType=""{{x:Type vm:{2}}}"">
-						<v:{4} xmlns:v=""clr-namespace:{3};assembly={0}""/>
-					</DataTemplate>";
-		// 5: itemssource-property-name
-		private const string HierarchicalDataTemplateFormatString = @"<HierarchicalDataTemplate xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation""
-				    xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml""
-					xmlns:vm=""clr-namespace:{1};assembly={0}""
-					DataType=""{{x:Type vm:{2}}}"" ItemsSource=""{{Binding {5}}}"">
-						<v:{4} xmlns:v=""clr-namespace:{3};assembly={0}""/>
-					</HierarchicalDataTemplate>";
+		private static string DataTemplateFormat(
+			string assemblyName,
+			string vmTypeNS,
+			string vmTypeName,
+			string vTypeNS,
+			string vTypeName
+		) =>
+			$@"<DataTemplate
+					xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation""
+					xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml""
+					xmlns:vm=""clr-namespace:{vmTypeNS};assembly={assemblyName}""
+					DataType=""{{x:Type vm:{vmTypeName}}}"">
+				<v:{vTypeName} xmlns:v=""clr-namespace:{vTypeNS};assembly={assemblyName}""/>
+			</DataTemplate>";
+
+		private static string HierarchicalDataTemplateFormat(
+			string assemblyName,
+			string vmTypeNS,
+			string vmTypeName,
+			string vTypeNS,
+			string vTypeName,
+			string itemsSourcePropertyName
+		) =>
+			$@"<HierarchicalDataTemplate
+					xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation""
+					xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml""
+					xmlns:vm=""clr-namespace:{vmTypeNS};assembly={assemblyName}""
+					DataType=""{{x:Type vm:{vmTypeName}}}""
+					ItemsSource=""{{Binding {itemsSourcePropertyName}}}"">
+				<v:{vTypeName} xmlns:v=""clr-namespace:{vTypeNS};assembly={assemblyName}""/>
+			</HierarchicalDataTemplate>";
 
 		/// <summary>
 		/// Creates implicit <see cref="System.Windows.DataTemplate"/>s for the view models in the calling assembly.
@@ -101,15 +114,10 @@ namespace DTDMVVM
 					var vmNamespace = vmType.Namespace;
 					var vNamespace = vType.Namespace;
 					var vName = vType.Name;
-					string templateString;
-					if (attribute == null)
-					{
-						templateString = String.Format(DataTemplateFormatString, assemblyName, vmNamespace, vmTypeName, vNamespace, vName);
-					}
-					else
-					{
-						templateString = String.Format(HierarchicalDataTemplateFormatString, assemblyName, vmNamespace, vmTypeName, vNamespace, vName, attribute.ItemsSourcePropertyName);
-					}
+
+					string templateString = attribute == null
+						? DataTemplateFormat(assemblyName, vmNamespace, vmTypeName, vNamespace, vName)
+						: HierarchicalDataTemplateFormat(assemblyName, vmNamespace, vmTypeName, vNamespace, vName, attribute.ItemsSourcePropertyName);
 
 					using (var stringReader = new StringReader(templateString))
 					using (var xmlReader = XmlReader.Create(stringReader))
