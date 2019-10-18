@@ -49,21 +49,26 @@ namespace DTDMVVM
 			</HierarchicalDataTemplate>";
 
 		/// <summary>
-		/// Creates implicit <see cref="System.Windows.DataTemplate"/>s for the view models in the calling assembly.
+		/// Creates implicit <see cref="DataTemplate"/> instances for the view models in <paramref name="assembly"/>.
 		/// <para>
-		/// The naming convention expects the views to be in the view namespace having the respective name when 'ViewModel' is replaced by 'View'.
+		/// View models have to be non-abstract and public. The name needs to contain "ViewModel".
 		/// </para>
 		/// <para>
-		/// Base.ViewModels.SubNamespace.MainViewModel -> Base.Views.SubNamespace.MainView
+		/// If a view class is found by replacing 'ViewModel' with 'View' in the full view model type name,
+		/// a DataTemplate is created. E.g.
 		/// </para>
 		/// <para>
-		/// To create a <see cref="System.Windows.HierarchicalDataTemplate"/> use the <see cref="DTDMVVM.HierarchicalViewModelAttribute"/> on the view model class.
+		/// App.ViewModels.SubNamespace.MainViewModel -> App.Views.SubNamespace.MainView
 		/// </para>
+		/// <para>
+		/// To create a <see cref="HierarchicalDataTemplate"/> use the <see cref="HierarchicalViewModelAttribute"/> on the view model class.
+		/// </para>
+		/// <para>Generic view models are currently not supported.</para>
 		/// </summary>
-		/// <param name="assembly">The assembly containing the view-models and views for which <see cref="System.Windows.DataTemplate"/>s should be created.</param>
+		/// <param name="assembly">The assembly containing the view models and views for which <see cref="DataTemplate"/> instances should be created.</param>
 		/// <returns>
-		/// A resource dictionary containing the implicit <see cref="System.Windows.DataTemplate"/>s,
-		/// it should be added to the <see cref="System.Windows.Application.Resources"/>' <see cref="System.Windows.ResourceDictionary.MergedDictionaries"/>.
+		/// A resource dictionary containing the implicit <see cref="DataTemplate"/> instances.
+		/// It should be added to the <see cref="Application.Resources"/>' <see cref="ResourceDictionary.MergedDictionaries"/>.
 		/// </returns>
 		public static ResourceDictionary CreateViewModelDataTemplates(Assembly assembly)
 		{
@@ -73,9 +78,10 @@ namespace DTDMVVM
 			var dataTemplateDictionary = new ResourceDictionary();
 
 			var vmTypes = from type in assembly.GetTypes()
-						  where !type.IsAbstract
+						  where
+							type.IsAbstract == false
 							&& type.IsPublic
-							&& !type.IsDefined(typeof(CompilerGeneratedAttribute), false)
+							&& type.IsDefined(typeof(CompilerGeneratedAttribute), false) == false
 							&& type.FullName.Contains("ViewModel")
 						  select type;
 
