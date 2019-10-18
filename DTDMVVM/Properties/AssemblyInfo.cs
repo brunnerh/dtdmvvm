@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("DTDMVVM")]
 [assembly: AssemblyDescription("A small view-model binder that employs data templates.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("brunnerh")]
 [assembly: AssemblyProduct("DTDMVVM")]
 [assembly: AssemblyCopyright("Copyright © brunnerh 2019")]
 [assembly: AssemblyTrademark("")]
@@ -21,3 +21,4 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 [assembly: AssemblyVersion("1.2.0")]
+[assembly: AssemblyFileVersion("1.2.0")]
